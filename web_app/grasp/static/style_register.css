@@ -1,0 +1,49 @@
+* {
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    list-style: none;
+}
+
+body {
+    background-image: url(pics/DL.jpg);
+    background-size: cover;
+}
+
+
+.navbar .logo {
+    text-decoration: none;
+    font-size: 30px;
+    font-family: "Vtks MilkShake", sans-serif;
+    font-weight: bold;
+    color: white;
+    padding-left: 10px;
+    padding-top: 10px;
+}
+
+
+main {
+    position: absolute;
+    background-color: rgba(255, 255, 255);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 30px 20px;
+    padding-bottom: 10px;
+    border-radius: 2px;
+    width: 40%;
+    font-family: 'Omnes', sans-serif;
+}
+
+main h1 {
+    text-align: center;
+    font-weight: 500;
+}
+
+footer {
+    position:fixed;
+    bottom: 0;
+    right: 0;
+    padding-right: 10px;
+    color: white;
+}

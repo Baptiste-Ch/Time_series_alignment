@@ -1,0 +1,204 @@
+* {
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    list-style: none;
+}
+
+body {
+    background-color: rgb(240, 240, 240);
+    text-align: center;
+    height: 100%;
+}
+
+.navbar {
+    position:relative;
+    display: flex;
+    padding-block: 5px;
+    align-items: center;
+    justify-content: space-between;
+    background-image: url("/static/pics/DL.jpg");
+    background-size: cover;
+    width: 100%;
+    box-sizing: border-box;
+    background-size: cover;
+    background-color: rgb(13, 58, 1);
+}
+
+.navbar a {
+    font-family: 'Omnes', sans-serif;
+    color:white;
+    text-decoration:none;
+}
+
+.navbar .logo {
+    font-size: 30px;
+    font-family: "Vtks MilkShake", sans-serif;
+    font-weight: bold;
+    color: rgb(200, 204, 255);
+    padding-left: 10px;
+}
+
+.navbar ul {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0rem;
+}
+
+.navbar ul li {
+    margin-inline: 25px;
+    font-weight: 500;
+    font-size: 15px;
+}
+
+.navbar ul div {
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+}
+
+.login {
+    font-weight: 600;
+    padding: 20px;
+}
+
+.register {
+    font-weight: 600;
+}
+
+
+.main-page{
+    background-color: white;
+    width: 80%;
+    margin: 0 auto;
+    padding: 0%;
+    padding-block: 5%;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+
+h1{
+    text-align: center;
+}
+
+#myDropzone {
+    border: 2px dashed #bbb;
+    border-radius: 5px;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f9f9f9;
+    color: #555;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+  }
+  
+#myDropzone.dragover {
+    background-color: #ebebeb;
+  }
+  
+#myDropzone .dz-message {
+    margin: 0;
+  }
+  
+#myDropzone .dz-message:hover {
+    text-decoration: underline;
+  }
+  
+#myDropzone .dz-message span {
+    display: block;
+    margin-top: 20px;
+  }
+  
+#myDropzone .dz-message .dz-button {
+    display: inline-block;
+    background-color: #337ab7;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+#myDropzone .dz-preview {
+    display: none;
+  }
+
+#algorithm {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid black;
+    border-radius: 10px;
+    margin-inline: 3%;
+    margin-top: 15%;
+  }
+  
+#fullplot-container {
+    width: 100%;
+    max-height: 40vh;
+    margin-top: 2%;
+    display: flex;
+    overflow-y: auto;
+  }
+
+#plot-container,
+#modified-fullplot {
+    width: 100%;
+  }
+
+
+#fullplot-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    padding-inline: 5%;
+  }
+
+#focus-container {
+    width: 100%;
+    border: 1px solid black;
+    border-radius: 10px;
+    background-color: rgb(234, 234, 234); 
+  }
+
+
+#focus_text {
+    padding: 5px;
+    padding-block: 10px;
+    display: flex;
+    flex-direction: column;
+  }
+
+#user_side {
+    display: flex;
+}
+
+#input_text,
+#inputs,
+#submits {
+    width: calc(100% / 3);
+}
+
+#input_text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-inline: 2%;
+}
+
+#inputs {
+    margin-inline: 0;
+}
+
+#submits {
+    display: flex;
+    flex-direction: column;
+    padding-inline: 10%;
+}
+

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Baptiste Chaigneau</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link href="https://fonts.cdnfonts.com/css/elianto" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" 
+  integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  
+  <link href="https://fonts.cdnfonts.com/css/vtks-milkshake" rel="stylesheet"/>
+  <link href="https://fonts.cdnfonts.com/css/omnes-2" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="../static/style_alignments.css" />  
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.4.2.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/dropzone.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/dropzone.min.js"></script>
+  
+  <script>
+    // Display after UPLOAD
+    function showDiv() {
+      var x = document.getElementById("algorithm");
+      var dropzone = document.getElementById("myDropzone");
+      if (x.style.display === "none") {
+        x.style.display = "flex";
+        dropzone.style.display = "none";
+      } else {
+        x.style.display = "none";
+        dropzone.style.display = "block";
+      }
+    }
+
+    // Initialize Dropzone
+    Dropzone.autoDiscover = false;
+    $(document).ready(function() {
+      // Customize Dropzone options as needed
+      var myDropzone = new Dropzone("#myDropzone", {
+        paramName: "file",
+        maxFilesize: 10,
+        url: "/upload",
+        // Add more options as needed
+        init: function() {
+          this.on("success", function(file, response) {
+            // File upload success event handler
+            console.log("File uploaded: " + file.name);
+            // Perform AJAX request to update the page content dynamically
+            $.ajax({
+              url: "/alignments", // Specify the URL for the AJAX request
+              type: "GET",
+              success: function(data) {
+                // Extract the plot data from the response
+                var plotData = data.plotData;
+                // Update the page content with the received plot data
+                $("#plot-container").html(plotData);
+                showDiv();
+              },
+              error: function(xhr, status, error) {
+                console.error("Error:", error);
+              }
+            });
+          });
+        }
+      });
+    });
+  </script>
+
+
+  <script>
+    window.addEventListener('DOMContentLoaded', (event) => {
+
+    //---------------------> STORE DATA AND UPDATE <-------------------------
+      function updateFigureFocus() {
+        $.ajax({
+          url: '/alignments/figure_focus',
+          type: 'POST',
+          dataType: 'json',
+          success: function (response) {
+            var updatedFigData = JSON.parse(response.init_json);
+            Plotly.react('focus-container', updatedFigData.data, updatedFigData.layout);
+          },
+          error: function (xhr, status, error) {
+            console.error(error);
+          }
+        });
+      }
+
+      document.getElementById('storeDataAndRefresh').addEventListener('click', function(event) {
+        event.preventDefault();
+        
+        var global_constraint = document.getElementsByName("global_constraint")[0].value;
+        var sakoe_chiba_radius = document.getElementsByName("sakoe_chiba_radius")[0].value;
+        var itakura_max_slope = document.getElementsByName("itakura_max_slope")[0].value;
+        var dropdown_value = document.getElementById("variable-dropdown2").value;
+
+        console.log(dropdown_value)
+        fetch('/store_data', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            align: 1,
+            global_constraint: global_constraint,
+            sakoe_chiba_radius: sakoe_chiba_radius,
+            itakura_max_slope: itakura_max_slope,
+            dropdown_value: dropdown_value,
+          }),
+        })
+        .then(response => {
+          if (response.ok) {
+            // Call the AJAX function to update the figure
+            updateFigureFocus();
+          } else {
+            throw new Error('Error storing data in the database');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+      });
+
+    //------------------------------>NEXT<----------------------------------
+    function next() {
+      $.ajax({
+        url: '/next_data',
+        type: 'POST',
+        dataType: 'json',
+        success: function (response) {
+
+
+          const modifiedData = JSON.parse(response.modified_json);
+          const focusData = JSON.parse(response.focus_json);
+
+          Plotly.react('modified-fullplot', modifiedData.data, modifiedData.layout);
+          Plotly.react('focus-container', focusData.data, focusData.layout);
+        },
+        error: function (xhr, status, error) {
+          alert('Error transferring tables: ' + error);
+        }
+      });
+    }
+    document.getElementById('next').addEventListener('click', function(event) {
+      event.preventDefault();
+      next();
+    });
+  });
+  </script>
+</head>
+
+
+
+
+<body>
+  <nav class="navbar">
+    <a href="{{url_for('home')}}" class="logo">GRASP</a>
+    <ul class="navhead">
+      <li><a href="#">Alignments</a></li>
+      <li><a href="{{url_for('documentation')}}">Documentation</a></li>
+      <div class="logs">
+        {% if current_user.is_authenticated %}
+        <a href="{{url_for('account') }}" class="login border-left">Account</a>
+        <a href="{{url_for('logout') }}" class="register">Logout</a>
+        {% else %}
+        <a href="{{url_for('login') }}" class="login">Login</a>
+        <a href="{{url_for('register') }}" class="register">Register</a>
+        {% endif %}
+      </div>
+    </ul>
+  </nav>
+  <main>
+    <div class="main-page">
+      <h1>Upload CSV</h1>
+      <div class="dropzone" id="myDropzone">
+        <div class="dz-message">
+          Drop files here or click to upload.
+        </div>
+      </div>
+
+      <div id="algorithm" style="display: none">
+        <div id="dropdown-container">
+          <select id="variable-dropdown1">
+              {% for option in init_dropdown %}
+                  <option value="{{ option.value }}">{{ option.label }}</option>
+              {% endfor %}
+          </select>
+        </div>
+        <div id="fullplot-container">
+          <div id="plot-container"></div>
+          <div id="modified-fullplot"></div>
+        </div>     
+
+        <div id="focus_plot_container">
+          <div id="focus_text">
+            <h5>STEP: <span id="counter">{{ counter }}</span></h5>
+            <div id="user_side">
+              <form id="input_text">
+                <label>Global Constraint :</label>
+                <label>Sakoe Chiba Radius :</label>
+                <label>Itakura Max Slope :</label>
+              </form>
+              <form id="inputs">
+                <input type="text" name="global_constraint" placeholder="None"/>
+                <input type="text" name="sakoe_chiba_radius" placeholder="None"/>
+                <input type="text" name="itakura_max_slope" placeholder="None"/>
+              </form>
+              <form id="submits">
+                <button id="decrease-button" onclick="decreaseCounter()">Back</button>      
+                <button type="submit" id="storeDataAndRefresh">Run Function</button>
+                <button id="next">Next</button>      
+                <a href="/upload/last_df.csv" download>Download</a>
+
+              </form>
+            </div>
+          </div>
+          <div id="focus-container"></div>
+          <div id="dropdown-container2">
+            <select id="variable-dropdown2">
+                {% for option in focus_dropdown %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p>&copy; 2023, B. Chaigneau</p>
+  </main>
+
+
+  <script type="text/javascript">
+    //--------- PLOTS OVERALL --------
+    var init_json = {{init_json | safe}};
+    Plotly.plot("plot-container", init_json, {});
+    var modified_json = {{modified_json | safe}};
+    Plotly.plot("modified-fullplot", modified_json, {});
+    var focus_json = {{focus_json | safe}};
+    Plotly.plot("focus-container", focus_json, {});
+
+    //------- DROPDOWN - UPDATE ------
+    $('#variable-dropdown1').on('change', function () {
+        var selectedVariable = $(this).val();
+
+        // Make AJAX requests to update the plot data based on the selected variable
+        $.ajax({
+            url: '/alignments/figure_init',
+            type: 'POST',
+            data: { 'variable-dropdown1': selectedVariable },
+            dataType: 'json',
+            success: function (response) {
+                var updatedFigData = JSON.parse(response.init_json);
+                Plotly.react('plot-container', updatedFigData.data, updatedFigData.layout);
+            },
+            error: function (xhr, status, error) {
+                console.error(error);
+            }
+        });
+        $.ajax({
+            url: '/alignments/figure_modified',
+            type: 'POST',
+            data: { 'variable-dropdown1': selectedVariable },
+            dataType: 'json',
+            success: function (response) {
+                var updatedFigData = JSON.parse(response.modified_json);
+                Plotly.react('modified-fullplot', updatedFigData.data, updatedFigData.layout);
+            },
+            error: function (xhr, status, error) {
+                console.error(error);
+            }
+        });
+    });
+
+    //------- DROPDOWN - UPDATE FOR FOCUS PLOT ------
+    $('#variable-dropdown2').on('change', function () {
+        var selectedVariable2 = $(this).val();
+
+        // Make an AJAX request to update the focus plot data based on the selected variable
+        $.ajax({
+            url: '/alignments/figure_focus',
+            type: 'POST',
+            data: { 'variable-dropdown2': selectedVariable2 },
+            dataType: 'json',
+            success: function (response) {
+                var updatedFigData = JSON.parse(response.init_json);
+                Plotly.react('focus-container', updatedFigData.data, updatedFigData.layout);
+            },
+            error: function (xhr, status, error) {
+                console.error(error);
+            }
+        });
+    });
+  </script>
+
+
+
+
+
+
+</body>
+</html>
