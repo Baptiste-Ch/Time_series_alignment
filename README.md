@@ -29,3 +29,6 @@ Packaging nécessaire :
   - tslearn
   - sklearn
   - scipy
+
+
+L'outil est encore en développement
