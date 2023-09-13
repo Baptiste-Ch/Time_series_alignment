@@ -1,4 +1,4 @@
-from grasp import app, empty_tables
+from grasp import app, db
 
 
 if __name__ == "__main__" :

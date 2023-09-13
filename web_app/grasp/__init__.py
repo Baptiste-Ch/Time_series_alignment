@@ -4,6 +4,7 @@ from flask_session import Session
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_dropzone import Dropzone
+from flask_migrate import Migrate
 
 import os
 import sqlite3
@@ -23,33 +24,31 @@ app.config['DROPZONE_PARALLEL_UPLOADS'] = 1
 
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
 
 
-
 @app.before_request
 def empty_tables():
-    if 'loaded' not in session or request.referrer is None:
-        print('LOADED IS NOT HERE')
-        from grasp.models import InputData, CounterData, VerifData
+    if 'loaded' not in session or request.referrer is None or session['loaded'] == None:
+        from grasp.models import InputData, CounterData, VerifData, HistoricData
 
         db.session.query(InputData).delete()
         db.session.query(CounterData).delete()
         db.session.query(VerifData).delete()
-        db.session.query(CounterData).delete()
+        db.session.query(HistoricData).delete()
         db.session.commit()
 
         session['loaded'] = True
 
-'''
-@app.before_request
-def before_request():
-    if 'loaded' not in session or not session['loaded']:
-        empty_tables()
-'''
+        conn = sqlite3.connect('temporary_data.db')
+        app_path = os.path.dirname(app.root_path)
+        if os.path.exists(os.path.join(app_path, 'temporary_data.db')):
+            os.remove(os.path.join(app_path, 'temporary_data.db'))
+        conn.close()
 
 from grasp import routes
 

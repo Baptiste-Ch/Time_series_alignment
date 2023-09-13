@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Baptiste Chaigneau</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link href="https://fonts.cdnfonts.com/css/elianto" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" 
+  integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  
+  <link href="https://fonts.cdnfonts.com/css/vtks-milkshake" rel="stylesheet"/>
+  <link href="https://fonts.cdnfonts.com/css/omnes-2" rel="stylesheet">
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.4.2.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <link href="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/dropzone.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/dropzone.min.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="../static/style_displays.css" />  
+
+
+
+
+  <script>
+    window.addEventListener('DOMContentLoaded', (event) => {
+
+      function performReset() {
+        $.ajax({
+          url: '/displays/reset',
+          type: 'POST',
+          dataType: 'json',
+          success: function(response) {
+            var updatedFigData = JSON.parse(response.reset_json);
+            Plotly.react('focus-container', updatedFigData.data, updatedFigData.layout);
+          },
+          error: function(xhr, status, error) {
+            console.error('Error:', error);
+          }
+        });
+      }
+
+      document.getElementById('resetButton').addEventListener('click', function(event) {
+        event.preventDefault();
+        performReset();
+      });
+
+
+    //---------------------> STORE DATA AND UPDATE <-------------------------
+      function updateFigureFocus() {
+        if (choice === 0) {
+          $.ajax({
+            url: '/displays/figure_focus',
+            type: 'POST',
+            dataType: 'json',
+            success: function (response) {
+              var updatedFigData = JSON.parse(response.focus_json);
+              Plotly.react('focus-container', updatedFigData.data, updatedFigData.layout);
+            },
+            error: function (xhr, status, error) {
+              console.error(error);
+            }
+          });
+        } else if (choice === 1) {
+          $.ajax({
+            url: '/displays/figure_focus2', 
+            type: 'POST',
+            dataType: 'json',
+            success: function (response) {
+              var updatedFigData = JSON.parse(response.focus_json);
+              Plotly.react('focus-container', updatedFigData.data, updatedFigData.layout);
+            },
+            error: function (xhr, status, error) {
+              console.error(error);
+            }
+          });
+        } else {
+          console.error('Invalid variableValue:', variableValue);
+        }
+      }
+
+
+      document.getElementById('storeDataAndRefresh').addEventListener('click', function(event) {
+        event.preventDefault();
+        
+        var global_constraint = document.getElementsByName("global_constraint")[0].value;
+        var sakoe_chiba_radius = document.getElementsByName("sakoe_chiba_radius")[0].value;
+        var itakura_max_slope = document.getElementsByName("itakura_max_slope")[0].value;
+        var dropdown_value = document.getElementById("variable-dropdown2").value;
+
+        var selectedVars = [];
+        var checkboxes = document.querySelectorAll('input[name="selectedItems"]:not(:checked)');
+        checkboxes.forEach(function(checkbox) {
+            selectedVars.push(checkbox.value);
+        });
+
+        console.log(dropdown_value)
+        fetch('/store_data', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            align: 1,
+            global_constraint: global_constraint,
+            sakoe_chiba_radius: sakoe_chiba_radius,
+            itakura_max_slope: itakura_max_slope,
+            dropdown_value: dropdown_value,
+            selected_vars: selectedVars,
+          }),
+        })
+        .then(response => {
+          if (response.ok) {
+            // Call the AJAX function to update the figure
+            updateFigureFocus();
+          } else {
+            throw new Error('Error storing data in the database');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+      });
+
+    //------------------------------>NEXT<----------------------------------
+    function next() {
+      console.log('Next button clicked');
+      if (choice === 0) {
+        $.ajax({
+          url: '/next_data',
+          type: 'POST',
+          dataType: 'json',
+          success: function (response) {
+
+
+            const modifiedData = JSON.parse(response.modified_json);
+            const focusData = JSON.parse(response.focus_json);
+
+            Plotly.react('modified-fullplot', modifiedData.data, modifiedData.layout);
+            Plotly.react('focus-container', focusData.data, focusData.layout);
+          },
+          error: function (xhr, status, error) {
+            alert('Error transferring tables: ' + error);
+          }
+        });
+      } else if (choice === 1) {
+        $.ajax({
+          url: '/next_data2',
+          type: 'POST',
+          dataType: 'json',
+          success: function (response) {
+
+
+            const modifiedData = JSON.parse(response.modified_json);
+            const focusData = JSON.parse(response.focus_json);
+
+            Plotly.react('modified-fullplot', modifiedData.data, modifiedData.layout);
+            Plotly.react('focus-container', focusData.data, focusData.layout);
+          },
+          error: function (xhr, status, error) {
+            alert('Error transferring tables: ' + error);
+          }
+        });        
+      }
+    }
+
+    document.getElementById('next').addEventListener('click', function(event) {
+      event.preventDefault();
+      next();
+    });
+
+    function back() {
+      console.log('Back button clicked');
+      $.ajax({
+        url: '/back_data',
+        type: 'POST',
+        dataType: 'json',
+        success: function (response) {
+          const focusData = JSON.parse(response.focus_json);
+          Plotly.react('focus-container', focusData.data, focusData.layout);
+        },
+        error: function (xhr, status, error) {
+          alert('Error transferring tables: ' + error);
+        }
+      });
+    }
+    document.getElementById('back').addEventListener('click', function(event) {
+      event.preventDefault();
+      back();
+    });
+  });
+  </script>
+  <script>
+    function showDiv() {
+      var x = document.getElementById("algorithm");
+      if (x.style.display === "none") {
+        x.style.display = "flex";
+      }
+    }
+    function handleFileUploadSuccess(file, response) {
+            // File upload success event handler
+            console.log("File uploaded: " + file.name);
+            showDiv();
+            smoothScrollToElement('algorithm', 10);
+    }
+
+    function smoothScrollToElement(elementId, targetOffset) {
+      const element = document.getElementById(elementId);
+      const startPosition = window.pageYOffset;
+      const targetPosition = element.offsetTop - targetOffset;
+      const distance = targetPosition - startPosition;
+      const duration = 800;
+      let startTime;
+
+      function scrollAnimation(currentTime) {
+        if (!startTime) startTime = currentTime;
+        const elapsedTime = currentTime - startTime;
+        const scrollProgress = Math.min(elapsedTime / duration, 1);
+        const ease = easeInOutCubic(scrollProgress);
+        window.scrollTo(0, startPosition + distance * ease);
+
+        if (scrollProgress < 1) {
+          requestAnimationFrame(scrollAnimation);
+        }
+      }
+      requestAnimationFrame(scrollAnimation);
+    }
+    function easeInOutCubic(t) {
+      return t < 0.5
+        ? 4 * t * t * t
+        : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+    }
+
+    // Initialize Dropzone
+    Dropzone.autoDiscover = false;
+    $(document).ready(function() {
+        var myDropzone = new Dropzone("#myDropzone", {
+            paramName: "file",
+            maxFilesize: 10,
+            url: "/upload",
+            addRemoveLinks: false,
+            init: function() {
+                this.on("success", handleFileUploadSuccess);
+            }
+        });
+    });
+  </script>
+</head>
+
+
+
+<body>
+  <main>
+    <div class="main-page">
+      <div id="dropzone_page">
+        <!--<h4>Leverage mathematics and compare the past</h4>-->
+        <div class="dropzone" id="myDropzone">
+          <div class="dz-message">
+            <h1>Get Started</h1>
+          </div>
+        </div>
+      </div>
+      <div id="algorithm" style="display: none">
+        <div id="fullplot-container">
+          <div id="title_dropdown">
+            <div id="title_init_data">
+              <h5>Initial Data</h5>
+              <div id="line"></div>
+            </div>
+            <div id="dropdown-container">
+              <select id="variable-dropdown1">
+                  {% for option in init_dropdown %}
+                      <option value="{{ option.value }}">{{ option.label }}</option>
+                  {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div id="plot-container"></div>
+
+          <h5 id="random_space">Aligned Data</h5>
+          <div id="line"></div>
+          <div id="modified-fullplot"></div>
+        </div>     
+
+        <div id="focus_plot_container">
+          <div id="dropdown-container2">
+            <select id="variable-dropdown2">
+                {% for option in focus_dropdown %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+            </select>
+          </div>
+          <div id="options">
+            <button id="setToZero">Option 1</button>
+            <button id="setToOne">Option 2</button>
+          </div>
+          <div class="user_side">
+            <div class="input_text">
+              <h5>Hyperparameters</h5>
+              <form class="inputs">
+                <div class="pairs">
+                  <label>Global Constraint :</label>
+                  <input type="text" name="global_constraint" placeholder="None"/>
+                </div>
+                <div class="pairs">
+                  <label>Sakoe Chiba Radius :</label>
+                  <input type="text" name="sakoe_chiba_radius" placeholder="None"/>
+                </div>
+                <div class="pairs">
+                  <label >Itakura Max Slope :</label>
+                  <input type="text" name="itakura_max_slope" placeholder="None"/>
+                </div>
+              </form>
+            </div>
+            <div class="checkbox">
+              <h5>Variables to align</h5>
+              <form class="checkboxForm">
+                  <ul id="checkboxList">
+                  </ul>
+              </form>
+            </div>
+          </div>
+          <div class="submits">
+            <form class="buttons1">
+              <button id="back" class="btn rounded-circle decrease-button">
+                <i class="fas fa-chevron-left"></i>
+              </button>                    
+              <button type="submit" class="storeDataAndRefresh" id="storeDataAndRefresh">Run Function</button>               
+              <button id="next" class="btn rounded-circle next-button">
+                <i class="fas fa-chevron-right"></i>
+              </button>  
+            </form> 
+            <form class="buttons2">                
+              <button type="submit" id="resetButton" class="resetButton">Reset</button>
+              <a href="/download" download>Download</a>   
+            </form>
+          </div>
+          <div id="focus-container"></div>
+        </div>
+      </div>
+    </div>
+
+    <p>&copy; 2023, B. Chaigneau</p>
+  </main>
+
+  <script>
+    let choice = 0;
+    
+    document.getElementById('setToOne').addEventListener('click', function () {
+      choice = 1;
+      document.getElementById('setToOne').style.backgroundColor = '#337ab7';
+      document.getElementById('setToOne').style.color = 'white';
+      document.getElementById('setToZero').style.backgroundColor = 'white';
+      document.getElementById('setToZero').style.color = '#337ab7';
+    });
+    document.getElementById('setToZero').addEventListener('click', function () {
+      choice = 0;
+      document.getElementById('setToZero').style.backgroundColor = '#337ab7';
+      document.getElementById('setToZero').style.color = 'white';
+      document.getElementById('setToOne').style.backgroundColor = 'white';
+      document.getElementById('setToOne').style.color = '#337ab7';
+    });
+  </script>
+
+  <script>   
+    document.addEventListener('DOMContentLoaded', function() {
+      // Access the variable passed from Flask and Jinja templating
+      const itemsList = {{ focus_dropdown | tojson | safe }};
+
+      // Function to generate the checkboxes dynamically
+      function generateCheckboxes() {
+          const checkboxList = document.getElementById('checkboxList');
+
+          itemsList.forEach(item => {
+              const listItem = document.createElement('li');
+              listItem.innerHTML = `
+                  <label>
+                      <input type="checkbox" name="selectedItems" value="${item.value}" checked>
+                      ${item.label}
+                  </label>
+              `;  
+              checkboxList.appendChild(listItem);
+          });
+      }
+
+      // Call the function to generate checkboxes when the page loads
+      generateCheckboxes();
+    });
+  </script>
+
+  <script type="text/javascript">
+    //--------- PLOTS OVERALL --------
+    var init_json = {{init_json | safe}};
+    Plotly.plot("plot-container", init_json, { responsive: true }, {});
+    var modified_json = {{modified_json | safe}};
+    Plotly.plot("modified-fullplot", modified_json, { responsive: true }, {});
+    var focus_json = {{focus_json | safe}};
+    Plotly.plot("focus-container", focus_json, { responsive: true }, {});
+
+
+
+    //------- DROPDOWN - UPDATE ------
+    $('#variable-dropdown1').on('change', function () {
+        var selectedVariable = $(this).val();
+
+        // Make AJAX requests to update the plot data based on the selected variable
+        $.ajax({
+            url: '/displays/figure_init',
+            type: 'POST',
+            data: { 'variable-dropdown1': selectedVariable },
+            dataType: 'json',
+            success: function (response) {
+                var updatedFigData = JSON.parse(response.init_json);
+                Plotly.react('plot-container', updatedFigData.data, updatedFigData.layout);
+            },
+            error: function (xhr, status, error) {
+                console.error(error);
+            }
+        });
+        $.ajax({
+            url: '/displays/figure_modified',
+            type: 'POST',
+            data: { 'variable-dropdown1': selectedVariable },
+            dataType: 'json',
+            success: function (response) {
+                var updatedFigData = JSON.parse(response.modified_json);
+                Plotly.react('modified-fullplot', updatedFigData.data, updatedFigData.layout);
+            },
+            error: function (xhr, status, error) {
+                console.error(error);
+            }
+        });
+    });
+
+    //------- DROPDOWN - UPDATE FOR FOCUS PLOT ------
+    $('#variable-dropdown2').on('change', function () {
+        var selectedVariable2 = $(this).val();
+
+        // Make an AJAX request to update the focus plot data based on the selected variable
+        $.ajax({
+            url: '/displays/figure_focus',
+            type: 'POST',
+            data: { 'variable-dropdown2': selectedVariable2 },
+            dataType: 'json',
+            success: function (response) {
+                var updatedFigData = JSON.parse(response.focus_json);
+                Plotly.react('focus-container', updatedFigData.data, updatedFigData.layout);
+            },
+            error: function (xhr, status, error) {
+                console.error(error);
+            }
+        });
+    });
+
+    let isRefreshing = false;
+    window.addEventListener('beforeunload', function() {
+        isRefreshing = true;
+        //event.returnValue = 'Are you sure you want to leave this page?';
+    });
+    window.addEventListener('unload', function() {
+        if (isRefreshing) {
+            window.location.href = '/displays';
+        }        
+    });
+  </script>
+
+
+
+
+
+
+</body>
+</html>

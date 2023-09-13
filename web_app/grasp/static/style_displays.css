@@ -1,0 +1,313 @@
+* {
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    list-style: none;
+}
+
+body {
+    text-align: center;
+    overflow-y: scroll;
+    background-image: url("../static/pics/earth.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center top;
+    width: 100%;
+    height: 100%;
+}
+
+
+#dropzone_page {
+    margin-top: 45vh;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+h1{
+    text-align: center;
+}
+
+
+#myDropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: baseline;
+    font-family: 'Times New Roman', Times, serif;
+  }
+
+.dropzone h1 {
+    margin: 0;
+    font-weight: 800;
+    color: white;
+}
+
+#myDropzone .dz-message {
+    margin: 0;
+    display: block !important;
+  }
+
+#myDropzone .dz-preview {
+    display: flex;
+}
+
+
+#myDropzone .dz-message .dz-button {
+    display: inline-block;
+    background-color: #337ab7;
+    color: #fff;
+    cursor: pointer;
+  }
+
+#myDropzone .dz-preview {
+    display: none;
+  }
+  
+.dropzone {
+    border: none;
+    padding: 0;
+    margin: 0;
+    background: none;
+    min-height: 30px;
+}
+
+
+
+#algorithm {
+  display: flex;
+  flex-direction: row;
+  border: 1px solid black;
+  border-radius: 10px;
+  margin-inline: 3%;
+  margin-top: 60vh;
+  background-color: #ffffff;
+  padding-block: 30px;
+  padding-inline: 30px;
+}
+
+#fullplot-container,
+#focus_plot_container {
+  flex: 1; 
+  margin-top: 2%;
+  margin-right: 2%;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+}
+
+
+#title_dropdown {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+#title_init_data {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+#dropdown-container {
+  margin-left: auto;
+}
+
+#line {
+  width: 150px;
+  height: 1.5px; 
+  background-color: black;
+  margin: 3px 0;
+}
+
+#random_space {
+  margin-top: 40px;
+}
+
+#plot-container,
+#modified-fullplot {
+  flex: 1;
+  width: 40vw;
+  height: 40vh;
+  max-height: 30vh;
+  overflow-y: scroll;
+}
+
+
+
+
+
+
+
+  
+#focus_plot_container {
+  margin-left: 2%;
+  width: 100%;
+}
+
+#dropdown-container2 {
+  margin-right: auto;
+}
+
+#options {
+  flex: 1;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  padding-inline: 2%;
+}
+
+
+#setToZero, #setToOne {
+  flex: 1;
+  width: 49%;
+  border: none;
+  cursor: pointer;
+}
+
+#setToZero {
+  background-color: #337ab7;
+  color: white;
+}
+
+#setToOne {
+  background-color: white;
+  color:#337ab7;
+}
+
+
+
+#focus-container {
+  width: 40vw;
+  height: 40vh;
+}
+
+
+
+
+#focus_text {
+    padding: 5px;
+    padding-block: 10px;
+    display: flex;
+    flex-direction: column;
+  }
+
+.user_side {
+    display: flex;
+    flex-direction: row;
+    margin-inline: 20px;
+    align-items: flex-start; 
+    height: 250px;
+}
+
+.input_text {
+    border: 1px solid #ccc;
+    align-items: flex-start;
+    height: 90%;
+    padding: 20px;
+    width: calc(55% - 40px);
+    margin-bottom: 20px;   
+}
+
+.inputs {
+    display: flex;
+    flex-direction: column;
+    flex: 1;    
+}
+
+.pairs {
+    display: flex;
+    align-items: center; 
+    margin-bottom: 10px;
+}
+  
+.inputs label {
+    flex: 0 0 200px;
+    font-weight: bold;
+    text-align: left;
+}
+  
+.inputs input[type="text"] {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ccc;
+  }
+
+.checkbox {
+    border: 1px solid #ccc;
+    padding: 20px;
+    height: 90%;
+    width: calc(25% - 40px);
+    align-items: flex-start;
+    margin-inline: 10px;
+    margin-bottom: 20px; 
+}
+
+.checkboxForm {
+    overflow-y: auto;
+    max-height: 55%;
+    padding: 10px;
+    margin-bottom: 15px;
+    margin-inline: 20px;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+  }
+
+#checkboxList {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+
+  }
+
+#checkboxList label {
+    display: flex;
+    align-items: flex-start; 
+    padding-left: 20px; 
+  } 
+
+#checkboxList label input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+
+
+#variable-dropdown2 {
+    padding-left: 5%;
+    padding-block: 6px;
+    width: 100%;
+}
+
+.submits {
+    flex: 3;
+    padding: 10px;
+    border: 1px solid #ccc;
+    height: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+.back .next {
+    background-color: #ccc;
+    border: none; 
+}
+
+.buttons1 {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin: 20px;
+}
+
+
+#storeDataAndRefresh, #resetButton, a {
+    width: 150px; 
+    text-align: center;
+  }
+
+
