@@ -120,40 +120,21 @@ h4 {
   font-weight: bolder;
 }
 
-p {
-  display: inline-block;
-  width: 100%;
-}
-
 .list-with-text {
-  list-style: none;
-  padding: 0;
+  background-color: #f0f0f0;
+  margin-inline: 30px;
+  padding-block: 5px;
 }
 
 .list-with-text li {
-  margin-bottom: 10px; 
+  margin-block: 5px; 
   margin-left: 10px;
-  font-weight: bold ;
+  color: #455994;
 }
 
-.list_format li {
-  margin-inline: 60px;
-  padding: 5px;
-  width: 85%;
-}
-
-.list-with-text p {
-  margin-inline: 60px;
-  background-color: #f0f0f0 ;
-  padding: 20px;
-  width: 85%;
-
-}
-
-.list_ref li {
-  margin-inline: 20px;
-  padding: 10px;
-  width: 85%;
+p {
+  display: inline-block;
+  width: 100%;
 }
 
 

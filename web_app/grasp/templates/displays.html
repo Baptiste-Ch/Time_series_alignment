@@ -1,40 +1,50 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <!-- Set the title and character encoding for the webpage -->
   <title>Baptiste Chaigneau</title>
   <meta charset="utf-8">
+
+  <!-- Configure the viewport for responsive design -->
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+  <!-- Include external fonts and CSS libraries -->
   <link href="https://fonts.cdnfonts.com/css/elianto" rel="stylesheet"/>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" 
-  integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   <link href="https://fonts.cdnfonts.com/css/vtks-milkshake" rel="stylesheet"/>
   <link href="https://fonts.cdnfonts.com/css/omnes-2" rel="stylesheet">
 
+  <!-- Include jQuery and Plotly JavaScript libraries -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.plot.ly/plotly-2.4.2.min.js"></script>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
+  <!-- Include additional CSS and font-awesome icons -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
+  <!-- Include Dropzone CSS and JavaScript for file uploads -->
   <link href="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/dropzone.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/dropzone.min.js"></script>
 
-  <link rel="stylesheet" type="text/css" href="../static/style_displays.css" />  
-
+  <!-- Include custom CSS styles -->
+  <link rel="stylesheet" type="text/css" href="../static/style_displays.css" />
 
 
 
   <script>
+    // When the DOM is fully loaded, execute this code
     window.addEventListener('DOMContentLoaded', (event) => {
 
+      // Function to perform a reset action
       function performReset() {
+        // Make an AJAX request to reset data
         $.ajax({
           url: '/displays/reset',
           type: 'POST',
           dataType: 'json',
           success: function(response) {
+            // Parse the JSON response and update the Plotly figure
             var updatedFigData = JSON.parse(response.reset_json);
             Plotly.react('focus-container', updatedFigData.data, updatedFigData.layout);
           },
@@ -44,20 +54,25 @@
         });
       }
 
+      // Attach a click event listener to the "Reset" button
       document.getElementById('resetButton').addEventListener('click', function(event) {
         event.preventDefault();
+        // Call the performReset function when the button is clicked
         performReset();
       });
 
+      //---------------------> STORE DATA AND UPDATE <-------------------------
 
-    //---------------------> STORE DATA AND UPDATE <-------------------------
+      // Function to update the figure based on user choice
       function updateFigureFocus() {
         if (choice === 0) {
+          // Make an AJAX request to update the figure based on choice 0
           $.ajax({
             url: '/displays/figure_focus',
             type: 'POST',
             dataType: 'json',
             success: function (response) {
+              // Parse the JSON response and update the Plotly figure
               var updatedFigData = JSON.parse(response.focus_json);
               Plotly.react('focus-container', updatedFigData.data, updatedFigData.layout);
             },
@@ -66,11 +81,13 @@
             }
           });
         } else if (choice === 1) {
+          // Make an AJAX request to update the figure based on choice 1
           $.ajax({
             url: '/displays/figure_focus2', 
             type: 'POST',
             dataType: 'json',
             success: function (response) {
+              // Parse the JSON response and update the Plotly figure
               var updatedFigData = JSON.parse(response.focus_json);
               Plotly.react('focus-container', updatedFigData.data, updatedFigData.layout);
             },
@@ -79,26 +96,32 @@
             }
           });
         } else {
+          // Log an error message for an invalid choice
           console.error('Invalid variableValue:', variableValue);
         }
       }
 
-
+      // Attach a click event listener to the "Store Data and Refresh" button
       document.getElementById('storeDataAndRefresh').addEventListener('click', function(event) {
         event.preventDefault();
-        
+
+        // Retrieve values from form inputs
         var global_constraint = document.getElementsByName("global_constraint")[0].value;
         var sakoe_chiba_radius = document.getElementsByName("sakoe_chiba_radius")[0].value;
         var itakura_max_slope = document.getElementsByName("itakura_max_slope")[0].value;
         var dropdown_value = document.getElementById("variable-dropdown2").value;
 
+        // Gather selected variables from checkboxes
         var selectedVars = [];
         var checkboxes = document.querySelectorAll('input[name="selectedItems"]:not(:checked)');
         checkboxes.forEach(function(checkbox) {
             selectedVars.push(checkbox.value);
         });
 
-        console.log(dropdown_value)
+        // Log the dropdown value for debugging
+        console.log(dropdown_value);
+
+        // Make a fetch request to store data and update the figure
         fetch('/store_data', {
           method: 'POST',
           headers: {
@@ -118,6 +141,7 @@
             // Call the AJAX function to update the figure
             updateFigureFocus();
           } else {
+            // Handle the error when data storage fails
             throw new Error('Error storing data in the database');
           }
         })
@@ -126,17 +150,19 @@
         });
       });
 
+
     //------------------------------>NEXT<----------------------------------
+    // Function to handle the "Next" button click
     function next() {
       console.log('Next button clicked');
+      // Check the value of "choice" to determine the appropriate AJAX request
       if (choice === 0) {
         $.ajax({
           url: '/next_data',
           type: 'POST',
           dataType: 'json',
           success: function (response) {
-
-
+            // Parse JSON response and update Plotly figures
             const modifiedData = JSON.parse(response.modified_json);
             const focusData = JSON.parse(response.focus_json);
 
@@ -144,6 +170,7 @@
             Plotly.react('focus-container', focusData.data, focusData.layout);
           },
           error: function (xhr, status, error) {
+            // Display an alert if there's an error during data transfer
             alert('Error transferring tables: ' + error);
           }
         });
@@ -153,8 +180,7 @@
           type: 'POST',
           dataType: 'json',
           success: function (response) {
-
-
+            // Parse JSON response and update Plotly figures
             const modifiedData = JSON.parse(response.modified_json);
             const focusData = JSON.parse(response.focus_json);
 
@@ -162,17 +188,21 @@
             Plotly.react('focus-container', focusData.data, focusData.layout);
           },
           error: function (xhr, status, error) {
+            // Display an alert if there's an error during data transfer
             alert('Error transferring tables: ' + error);
           }
         });        
       }
     }
 
+    // Attach a click event listener to the "Next" button
     document.getElementById('next').addEventListener('click', function(event) {
       event.preventDefault();
+      // Call the "next" function when the button is clicked
       next();
     });
 
+    // Function to handle the "Back" button click
     function back() {
       console.log('Back button clicked');
       $.ajax({
@@ -180,34 +210,48 @@
         type: 'POST',
         dataType: 'json',
         success: function (response) {
+          // Parse JSON response and update the "focus-container" Plotly figure
           const focusData = JSON.parse(response.focus_json);
           Plotly.react('focus-container', focusData.data, focusData.layout);
         },
         error: function (xhr, status, error) {
+          // Display an alert if there's an error during data transfer
           alert('Error transferring tables: ' + error);
         }
       });
     }
+
+    // Attach a click event listener to the "Back" button
     document.getElementById('back').addEventListener('click', function(event) {
       event.preventDefault();
+      // Call the "back" function when the button is clicked
       back();
     });
   });
   </script>
   <script>
+    // Function to show a hidden div element with the ID "algorithm"
     function showDiv() {
       var x = document.getElementById("algorithm");
+      // Check if the element is hidden, and if so, make it flex-displayed
       if (x.style.display === "none") {
         x.style.display = "flex";
       }
     }
+
+    // Function to handle file upload success
     function handleFileUploadSuccess(file, response) {
-            // File upload success event handler
-            console.log("File uploaded: " + file.name);
-            showDiv();
-            smoothScrollToElement('algorithm', 10);
+      // Log a message indicating the uploaded file's name
+      console.log("File uploaded: " + file.name);
+      
+      // Call the "showDiv" function to display the hidden div
+      showDiv();
+      
+      // Scroll smoothly to the "algorithm" element with a specified target offset
+      smoothScrollToElement('algorithm', 10);
     }
 
+    // Function to smoothly scroll to a specified element with an offset
     function smoothScrollToElement(elementId, targetOffset) {
       const element = document.getElementById(elementId);
       const startPosition = window.pageYOffset;
@@ -216,6 +260,7 @@
       const duration = 800;
       let startTime;
 
+      // Function to animate the scroll
       function scrollAnimation(currentTime) {
         if (!startTime) startTime = currentTime;
         const elapsedTime = currentTime - startTime;
@@ -227,26 +272,31 @@
           requestAnimationFrame(scrollAnimation);
         }
       }
+
+      // Initiate the scroll animation
       requestAnimationFrame(scrollAnimation);
     }
+
+    // Easing function for smooth scrolling
     function easeInOutCubic(t) {
       return t < 0.5
         ? 4 * t * t * t
         : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
     }
 
-    // Initialize Dropzone
+    // Initialize Dropzone for file upload
     Dropzone.autoDiscover = false;
     $(document).ready(function() {
-        var myDropzone = new Dropzone("#myDropzone", {
-            paramName: "file",
-            maxFilesize: 10,
-            url: "/upload",
-            addRemoveLinks: false,
-            init: function() {
-                this.on("success", handleFileUploadSuccess);
-            }
-        });
+      var myDropzone = new Dropzone("#myDropzone", {
+        paramName: "file",           // Parameter name for uploaded files
+        maxFilesize: 10,            // Maximum allowed file size (in megabytes)
+        url: "/upload",             // Server endpoint for file upload
+        addRemoveLinks: false,      // Disable remove links for uploaded files
+        init: function() {
+          // Attach a success event handler for file uploads
+          this.on("success", handleFileUploadSuccess);
+        }
+      });
     });
   </script>
 </head>
@@ -255,12 +305,21 @@
 
 <body>
   <main>
+    <div class="menu-container">
+      <a href="{{url_for('displays')}}" class="logo">GRASP</a>
+      <div class="hamburger1" id="hamburger1">&#9776;</div>
+      <div class="burger-menu1" id="burger-menu1">
+        <a href="{{url_for('displays')}}">Home</a>
+        <a href="{{url_for('documentation')}}">Documentation</a>
+        <a href="{{url_for('about')}}">About</a>
+      </div>
+    </div>  
     <div class="main-page">
       <div id="dropzone_page">
         <!--<h4>Leverage mathematics and compare the past</h4>-->
         <div class="dropzone" id="myDropzone">
           <div class="dz-message">
-            <h1>Get Started</h1>
+            <h1>Dive In</h1>
           </div>
         </div>
       </div>
@@ -295,23 +354,52 @@
             </select>
           </div>
           <div id="options">
-            <button id="setToZero">Option 1</button>
-            <button id="setToOne">Option 2</button>
+            <button id="setToZero">
+              Option 1
+              <div class="help-tip">
+                <p>Align each sequence with its previous pair</p>
+              </div>
+            </button>
+            <button id="setToOne">
+              Option 2
+              <div class="help-tip">
+                <p>Align the sequences between a reference (the first sequence) and the others</p>
+              </div>
+            </button>
+            
           </div>
           <div class="user_side">
             <div class="input_text">
               <h5>Hyperparameters</h5>
               <form class="inputs">
                 <div class="pairs">
-                  <label>Global Constraint :</label>
+                  <label class="circle-label">
+                    Global Constraint
+                    <div class="help-tip">
+                      <p>"Global Constraint" controls the allowed warping patterns between time series sequences. <i>Choose between : "itakura", "sakoe_chiba" or let it empty</i></p>
+                    </div>
+                    :
+                  </label>                                  
                   <input type="text" name="global_constraint" placeholder="None"/>
                 </div>
                 <div class="pairs">
-                  <label>Sakoe Chiba Radius :</label>
+                  <label class="circle-label">
+                    Sakoe Chiba Radius
+                    <div class="help-tip">
+                      <p>"Sakoe Chiba Radius" defines a constraint on the maximum step size allowed during alignment, affecting the locality of warping patterns between time series sequences. <i>Choose an integer number</i></p>
+                    </div>
+                    :
+                  </label> 
                   <input type="text" name="sakoe_chiba_radius" placeholder="None"/>
                 </div>
                 <div class="pairs">
-                  <label >Itakura Max Slope :</label>
+                  <label class="circle-label">
+                    Itakura Max Slope
+                    <div class="help-tip">
+                      <p>"Itakura Max Slope" restricts the allowed slopes between the warping path and influences the shape of the alignment, controlling the trade-off between smooth and jagged alignments. <i>Choose a positive rational number</i></p>
+                    </div>
+                    :
+                  </label> 
                   <input type="text" name="itakura_max_slope" placeholder="None"/>
                 </div>
               </form>
@@ -334,31 +422,88 @@
                 <i class="fas fa-chevron-right"></i>
               </button>  
             </form> 
-            <form class="buttons2">                
-              <button type="submit" id="resetButton" class="resetButton">Reset</button>
-              <a href="/download" download>Download</a>   
-            </form>
+            <div class="navbar">
+              <div class="burger-menu2" id="burger-menu2">
+                <button id="resetButton">Reset</button>
+                <div id="line_burger2"></div>
+                <a href="/download" download>Download</a>
+                <div id="line_burger2"></div>
+              </div>
+              <div class="hamburger2" id="hamburger2">&#9776;</div>
+            </div>                 
           </div>
           <div id="focus-container"></div>
         </div>
       </div>
     </div>
-
-    <p>&copy; 2023, B. Chaigneau</p>
   </main>
+  <footer>
+    <p>&copy; 2023, B. Chaigneau</p>
+  </footer>
 
   <script>
+    // Event listener for a hamburger icon click
+    document.getElementById('hamburger2').addEventListener('click', function() {
+      // Get references to the navbar and burger menu elements
+      const navbar = document.querySelector('.navbar');
+      const burgerMenu = document.getElementById('burger-menu2');
+
+      // Check if the navbar is expanded or collapsed
+      const isExpanded = navbar.classList.contains('expanded');
+
+      // Toggle the opacity of the burger menu based on the expansion state
+      if (isExpanded) {
+        burgerMenu.style.opacity = '0';
+      } else {
+        burgerMenu.style.opacity = '1';
+      }
+
+      // Toggle the 'expanded' class on the navbar
+      navbar.classList.toggle('expanded');
+
+      // Delay the toggling of 'show2' class on the burger menu
+      setTimeout(function() {
+        burgerMenu.classList.toggle('show2');
+      }, isExpanded ? 0 : 300); 
+    });
+
+    // Get references to hamburger and burger menu elements
+    const hamburger1 = document.getElementById("hamburger1");
+    const burgerMenu1 = document.getElementById("burger-menu1");
+
+    // Event listener for hamburger icon click to toggle the menu
+    hamburger1.addEventListener("click", () => {
+      burgerMenu1.classList.toggle("show1");
+    });
+
+    // Event listener to close the burger menu when clicking outside of it
+    document.addEventListener('click', function(event) {
+      const menuContainer = document.querySelector('.menu-container');
+      const burgerMenu = document.querySelector('.burger-menu1');
+
+      // Check if the clicked element is outside the menu container and burger menu
+      if (!menuContainer.contains(event.target) && !burgerMenu.contains(event.target)) {
+        burgerMenu.classList.remove('show1');
+      }
+    });
+
+    // Variable to store a choice (0 or 1)
     let choice = 0;
-    
+
+    // Event listener to set the choice to 1 and update button styles
     document.getElementById('setToOne').addEventListener('click', function () {
       choice = 1;
+      // Update button styles to indicate the selected choice
       document.getElementById('setToOne').style.backgroundColor = '#337ab7';
       document.getElementById('setToOne').style.color = 'white';
       document.getElementById('setToZero').style.backgroundColor = 'white';
       document.getElementById('setToZero').style.color = '#337ab7';
     });
+
+    // Event listener to set the choice to 0 and update button styles
     document.getElementById('setToZero').addEventListener('click', function () {
       choice = 0;
+      // Update button styles to indicate the selected choice
       document.getElementById('setToZero').style.backgroundColor = '#337ab7';
       document.getElementById('setToZero').style.color = 'white';
       document.getElementById('setToOne').style.backgroundColor = 'white';
@@ -367,60 +512,64 @@
   </script>
 
   <script>   
+    // Event listener for when the DOM (Document Object Model) is fully loaded
     document.addEventListener('DOMContentLoaded', function() {
       // Access the variable passed from Flask and Jinja templating
+      // The {{ focus_dropdown | tojson | safe }} is typically a server-side variable
       const itemsList = {{ focus_dropdown | tojson | safe }};
-
-      // Function to generate the checkboxes dynamically
+      // Function to generate checkboxes dynamically
       function generateCheckboxes() {
-          const checkboxList = document.getElementById('checkboxList');
-
-          itemsList.forEach(item => {
-              const listItem = document.createElement('li');
-              listItem.innerHTML = `
-                  <label>
-                      <input type="checkbox" name="selectedItems" value="${item.value}" checked>
-                      ${item.label}
-                  </label>
-              `;  
-              checkboxList.appendChild(listItem);
-          });
+        // Get a reference to the element where checkboxes will be added
+        const checkboxList = document.getElementById('checkboxList');
+        // Loop through each item in the itemsList array
+        itemsList.forEach(item => {
+          // Create a new list item
+          const listItem = document.createElement('li');
+          // Populate the list item with HTML containing a checkbox and label
+          listItem.innerHTML = `
+            <label>
+              <input type="checkbox" name="selectedItems" value="${item.value}" checked>
+              ${item.label}
+            </label>
+          `;  
+          // Append the new list item to the checkboxList
+          checkboxList.appendChild(listItem);
+        });
       }
-
       // Call the function to generate checkboxes when the page loads
       generateCheckboxes();
     });
   </script>
 
   <script type="text/javascript">
-    //--------- PLOTS OVERALL --------
+    // Initial Plot Setup
     var init_json = {{init_json | safe}};
-    Plotly.plot("plot-container", init_json, { responsive: true }, {});
+    Plotly.plot("plot-container", init_json, { responsive: true }, {}); // Initialize the "plot-container" with initial data
     var modified_json = {{modified_json | safe}};
-    Plotly.plot("modified-fullplot", modified_json, { responsive: true }, {});
+    Plotly.plot("modified-fullplot", modified_json, { responsive: true }, {}); // Initialize the "modified-fullplot" with initial data
     var focus_json = {{focus_json | safe}};
-    Plotly.plot("focus-container", focus_json, { responsive: true }, {});
+    Plotly.plot("focus-container", focus_json, { responsive: true }, {}); // Initialize the "focus-container" with initial data
 
-
-
-    //------- DROPDOWN - UPDATE ------
+    // Dropdown Update - Handling changes in the first dropdown
     $('#variable-dropdown1').on('change', function () {
-        var selectedVariable = $(this).val();
+        var selectedVariable = $(this).val(); // Get the selected variable from the dropdown
 
         // Make AJAX requests to update the plot data based on the selected variable
         $.ajax({
-            url: '/displays/figure_init',
-            type: 'POST',
-            data: { 'variable-dropdown1': selectedVariable },
-            dataType: 'json',
-            success: function (response) {
-                var updatedFigData = JSON.parse(response.init_json);
-                Plotly.react('plot-container', updatedFigData.data, updatedFigData.layout);
+            url: '/displays/figure_init', // URL for the AJAX request
+            type: 'POST', // HTTP method
+            data: { 'variable-dropdown1': selectedVariable }, // Data to send to the server
+            dataType: 'json', // Expected data type of the response
+            success: function (response) { // Function to handle the successful response
+                var updatedFigData = JSON.parse(response.init_json); // Parse the JSON response
+                Plotly.react('plot-container', updatedFigData.data, updatedFigData.layout); // Update the "plot-container" with new data
             },
-            error: function (xhr, status, error) {
-                console.error(error);
+            error: function (xhr, status, error) { // Function to handle errors
+                console.error(error); // Log the error to the console
             }
         });
+
+        // Make another AJAX request to update the "modified-fullplot" based on the selected variable
         $.ajax({
             url: '/displays/figure_modified',
             type: 'POST',
@@ -436,9 +585,9 @@
         });
     });
 
-    //------- DROPDOWN - UPDATE FOR FOCUS PLOT ------
+    // Dropdown Update for Focus Plot - Handling changes in the second dropdown
     $('#variable-dropdown2').on('change', function () {
-        var selectedVariable2 = $(this).val();
+        var selectedVariable2 = $(this).val(); // Get the selected variable from the second dropdown
 
         // Make an AJAX request to update the focus plot data based on the selected variable
         $.ajax({
@@ -446,32 +595,15 @@
             type: 'POST',
             data: { 'variable-dropdown2': selectedVariable2 },
             dataType: 'json',
-            success: function (response) {
-                var updatedFigData = JSON.parse(response.focus_json);
-                Plotly.react('focus-container', updatedFigData.data, updatedFigData.layout);
+            success: function (response) { // Function to handle the successful response
+                var updatedFigData = JSON.parse(response.focus_json); // Parse the JSON response
+                Plotly.react('focus-container', updatedFigData.data, updatedFigData.layout); // Update the "focus-container" with new data
             },
-            error: function (xhr, status, error) {
-                console.error(error);
+            error: function (xhr, status, error) { // Function to handle errors
+                console.error(error); // Log the error to the console
             }
         });
     });
-
-    let isRefreshing = false;
-    window.addEventListener('beforeunload', function() {
-        isRefreshing = true;
-        //event.returnValue = 'Are you sure you want to leave this page?';
-    });
-    window.addEventListener('unload', function() {
-        if (isRefreshing) {
-            window.location.href = '/displays';
-        }        
-    });
   </script>
-
-
-
-
-
-
 </body>
 </html>

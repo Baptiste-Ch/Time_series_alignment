@@ -5,6 +5,10 @@
     list-style: none;
 }
 
+html {
+  height: 100%;
+}
+
 body {
     text-align: center;
     overflow-y: scroll;
@@ -13,12 +17,89 @@ body {
     background-size: cover;
     background-position: center top;
     width: 100%;
-    height: 100%;
+    height: 110%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.menu-container {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 40px;
+  background-color: rgb(255, 255, 255);
+  border-left: 1.5px solid #ccc; 
+  border-bottom: 1.5px solid #ccc; 
+  border-radius: 0 0 0 10px;
+  margin-left: 88%;
 }
 
 
+.hamburger1 {
+  cursor: pointer;
+  position: absolute;
+  right: 8px;
+  font-size: 35px;
+  color: rgb(42, 42, 93);
+}
+
+.burger-menu1 {
+  display: none;
+  position: fixed;
+  top: 32px;
+  right: 0;
+  width: 12%;
+  background-color: black;
+}
+
+.logo {
+  font-size: 20px;
+  font-family: "Vtks MilkShake", sans-serif;
+  font-weight: bold;
+  color: rgb(42, 42, 93);
+  padding-left: 10px;
+  padding-top: 3px;
+}
+
+.logo:hover {
+  text-decoration: none;
+}
+
+
+.burger-menu1 a {
+  text-align: right;
+  color: #fff;
+  text-decoration: none;
+  display: block;
+  padding: 13px;
+  transition: color 0.3s;
+}
+
+.burger-menu1 a:hover {
+  background-color: #ccc;
+  color: #337ab7;
+
+}
+
+.burger-menu1.show1 {
+  display: block;
+}
+
+.fictitious-element {
+  position: absolute;
+  top: 20px;
+  right: 100px;
+}
+
+
+
+
+
 #dropzone_page {
-    margin-top: 45vh;
+    margin-top: 40vh;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -43,6 +124,7 @@ h1{
     margin: 0;
     font-weight: 800;
     color: white;
+    font-size: 60px;
 }
 
 #myDropzone .dz-message {
@@ -84,8 +166,9 @@ h1{
   margin-inline: 3%;
   margin-top: 60vh;
   background-color: #ffffff;
-  padding-block: 30px;
+  padding-top: 15px;
   padding-inline: 30px;
+  padding-bottom: 35px;
 }
 
 #fullplot-container,
@@ -103,6 +186,11 @@ h1{
   display: flex;
   flex-direction: row;
   width: 100%;
+}
+
+#variable-dropdown1, #variable-dropdown2 {
+  padding: 3px;
+  font-size: 12px;
 }
 
 #title_init_data {
@@ -152,19 +240,25 @@ h1{
 }
 
 #options {
-  flex: 1;
+  display: flex;
   width: 100%;
   justify-content: space-between;
   align-items: center;
-  padding-inline: 2%;
+  margin-top: 2%;
+  border: 1px solid #ccc;
 }
 
+#options button {
+  border: none; 
+  padding: 0; 
+  margin: 0; 
+}
 
 #setToZero, #setToOne {
   flex: 1;
-  width: 49%;
-  border: none;
   cursor: pointer;
+  box-sizing: border-box;
+  font-size: 16px;
 }
 
 #setToZero {
@@ -180,8 +274,9 @@ h1{
 
 
 #focus-container {
-  width: 40vw;
+  width: 45vw;
   height: 40vh;
+  overflow-y: scroll;
 }
 
 
@@ -197,24 +292,28 @@ h1{
 .user_side {
     display: flex;
     flex-direction: row;
-    margin-inline: 20px;
-    align-items: flex-start; 
-    height: 250px;
+    width: 100%;
 }
 
-.input_text {
+.input_text, .checkbox {
+    flex-grow: 1;
     border: 1px solid #ccc;
-    align-items: flex-start;
-    height: 90%;
-    padding: 20px;
-    width: calc(55% - 40px);
-    margin-bottom: 20px;   
+    margin-bottom: 5px;   
+}
+
+.user_side h5 {
+  position: relative;
+  margin-top: 7px;
+  margin-left: 7px;
+  width: 200px;
+  text-align: left;
 }
 
 .inputs {
     display: flex;
     flex-direction: column;
-    flex: 1;    
+    flex: 1;   
+    margin-inline: 20px;
 }
 
 .pairs {
@@ -223,31 +322,105 @@ h1{
     margin-bottom: 10px;
 }
   
+
+.circle-label {
+  display: inline-block;
+  position: relative;
+  margin-right: 10px;
+}
+
+.help-tip{
+  display: inline-block;
+  margin-left: 7px;
+  text-align: center;
+  background-color: #BCDBEA;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  cursor: default;
+  vertical-align: middle;
+}
+
+.help-tip:before{
+  content:'?';
+  font-weight: bold;
+  color:#fff;
+  font-size: 12px;
+}
+
+.help-tip:hover p{
+  display:block;
+  transform-origin: 100% 0%;
+
+  -webkit-animation: fadeIn 0.3s ease-in-out;
+  animation: fadeIn 0.3s ease-in-out;
+
+}
+
+.help-tip p{    
+  display: none;
+  text-align: left;
+  background-color: #1E2021;
+  padding: 20px;
+  margin-top: 2px;
+  width: 300px;
+  border-radius: 3px;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+  color: #FFF;
+  font-size: 13px;
+  line-height: 1.4;
+  position: relative;
+  z-index: 999;
+  transform: translateX(-95%);
+}
+
+
+
+/* CSS animation */
+
+@-webkit-keyframes fadeIn {
+  0% { 
+      opacity:0; 
+      transform: scale(0.6);
+  }
+
+  100% {
+      opacity:100%;
+      transform: scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  0% { opacity:0; }
+  100% { opacity:100%; }
+}
+
+
+
+
+
 .inputs label {
-    flex: 0 0 200px;
-    font-weight: bold;
+    flex: 0 0 180px;
+    font-weight: 500;
+    margin-bottom: 0;
+    font-size: 12px;
     text-align: left;
 }
   
+input[type="text"]::placeholder {
+  font-size: 12px;
+}
+
 .inputs input[type="text"] {
     width: 100%;
-    padding: 5px;
     border: 1px solid #ccc;
   }
 
-.checkbox {
-    border: 1px solid #ccc;
-    padding: 20px;
-    height: 90%;
-    width: calc(25% - 40px);
-    align-items: flex-start;
-    margin-inline: 10px;
-    margin-bottom: 20px; 
-}
 
 .checkboxForm {
     overflow-y: auto;
-    max-height: 55%;
+    max-height: 100px;
     padding: 10px;
     margin-bottom: 15px;
     margin-inline: 20px;
@@ -265,7 +438,8 @@ h1{
 #checkboxList label {
     display: flex;
     align-items: flex-start; 
-    padding-left: 20px; 
+    padding-left: 5px; 
+    font-size: 12px;
   } 
 
 #checkboxList label input[type="checkbox"] {
@@ -273,23 +447,83 @@ h1{
 }
 
 
-
-#variable-dropdown2 {
-    padding-left: 5%;
-    padding-block: 6px;
-    width: 100%;
-}
-
 .submits {
     flex: 3;
-    padding: 10px;
-    border: 1px solid #ccc;
     height: 90%;
+    width: 100%;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
   }
+
+
+/* CSS */
+.navbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0;
+  padding-inline: 9px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  position: relative;
+  width: 40px;
+  transition: width 0.3s;
+}
+
+.hamburger2 {
+  cursor: pointer;
+  z-index: 2;
+  font-size: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  line-height: 1;
+}
+
+.burger-menu2 {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1;
+  transition: left 0.3s;
+  margin-left: auto;
+}
+
+.burger-menu2.show2 {
+  display: flex;
+  flex-direction: row;
+  margin: 0;
+}
+
+.navbar.expanded {
+  width: 210px;
+}
+
+.burger-menu2 a,
+.burger-menu2 button {
+  color: #000000;
+  background-color: white;
+  text-decoration: none;
+  padding-block: 3px;
+  padding-inline: 15px;
+  font-size: 12px;
+  border: none;
+}
+
+.burger-menu2 a:hover,
+.burger-menu2 button:hover {
+  font-weight: 600;
+  color: #337ab7;
+}
+
+#line_burger2 {
+  width: 0.75px;
+  height: 12px; 
+  background-color: black;
+  margin: 0 5px;
+}
+
 
 .back .next {
     background-color: #ccc;
@@ -297,17 +531,25 @@ h1{
 }
 
 .buttons1 {
+  flex-grow: 1;
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    margin: 20px;
 }
 
 
-#storeDataAndRefresh, #resetButton, a {
-    width: 150px; 
+#storeDataAndRefresh {
     text-align: center;
+    font-size: 13px;
+    padding-inline: 15px;
+    margin-inline: 15px;
   }
 
-
+footer p {
+  color: white;
+  text-align: center;
+  margin-bottom: 0;
+  padding: 0;
+  font-size: 12px;
+}

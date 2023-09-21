@@ -14,36 +14,108 @@
     </head>
 
 
-
     <body>
-        <nav class="navbar">
-            <a href="{{url_for('home')}}" class="logo">GRASP</a>
-            <ul class="navhead">
-                <li><a href="{{(url_for('alignments'))}}">Alignments</a></li>
-                <li><a href="{{url_for('documentation')}}">Documentation</a></li>
-                <div class="logs">
-                    {% if current_user.is_authenticated %}
-                        <a href="{{url_for('account') }}" class="login border-left">Account</a>
-                        <a href="{{url_for('logout') }}" class="register">Logout</a>
-                    {% else %}
-                        <a href="{{url_for('login') }}" class="login">Login</a>
-                        <a href="{{url_for('register') }}" class="register">Register</a>
-                    {% endif %}
-                </div>
-            </ul>
-        </nav>
         <main>
+            <div class="menu-container">
+                <a href="{{url_for('displays')}}" class="logo">GRASP</a>
+                <div class="hamburger1" id="hamburger1">&#9776;</div>
+                <div class="burger-menu1" id="burger-menu1">
+                  <a href="{{url_for('displays')}}">Home</a>
+                  <a href="{{url_for('documentation')}}">Documentation</a>
+                  <a href="{{url_for('about')}}">About</a>
+                </div>
+            </div>  
+            <h1>Documentation</h1>
             <div class="main-page">
-                <h1>Documentation</h1>
-                <p>Lorem ipsum dolor sit amet. Et amet tempora et reprehenderit odit rem unde tempore. Ea dolorum laboriosam non dolorum quis sit cumque optio ea illo ullam non galisum voluptatibus non optio consectetur et minima doloribus. Ut dolor voluptates et quia incidunt 33 dolorum distinctio est voluptatem sunt non laudantium neque. 
-                    Et quidem veritatis et commodi beatae sit mollitia amet ut odio autem aut quis consequuntur qui earum quia eum omnis iure? Aut enim consequatur ut autem deleniti ea rerum omnis est minima excepturi qui earum molestias quo enim consequatur?
-                    In excepturi nihil vel galisum error non incidunt aliquid. Non debitis soluta sed similique officiis cum laudantium porro et sunt neque. Et internos exercitationem qui unde magni eum magni itaque qui autem consequatur.
+                <h4>What is GRASP :</h4>
+                <p><i>GRASP</i> is an application tool designed to semi-automate time series alignment tasks based on data characteristics.</p>
+                <p>Its initial use is intended for paleoclimatology, where the records formation processes are defined by heterogeneous 
+                    physical constraints over space. This means that the depth axis of a paleoclimatic record cannot be used as a basis for                  
+                    comparing sequences. Data comparison is then performed manually based solely on their common characteristics.</p>
+                <p>The <i>GRASP</i> tool proposes the use of an alignment method called <i>Dynamic Time Warping (DTW)</i>. This method measures the 
+                    similarity between elements of two sequences for each time step by calculating a cost matrix. An optimal path in this 
+                    matrix can then be deduced, allowing for the determination of how points in the two sequences correspond in time.</p>
+                    
+                <h4>Dynamic Time Warping :</h4>
+                <p>Many <i>DTW</i> algorithms exists in programing langages but the more famous is probably the one from the python <i>tslearn</i> library. 
+                    This is the one we use in this application. Two variations of the algorithm have been built : <i>Soft-DTW</i> and <i>DTW</i>. 
+                    Here we stayed focus on the initial DTW.</p>
+                <p>To better understand the algorithm and its implementation, feel free to visit their webpage :</p>
+                <a href="https://tslearn.readthedocs.io/en/latest/user_guide/dtw.html" target="_blank"><i>https://tslearn.readthedocs.io/en/latest/user_guide/dtw.html</i></a>
+
+                <h4>The Constraints</h4>
+                <p>In addition to the cost matrix, some constraints can be applied to limit the paths possibilities. There is in that application
+                    two different methods :</p>
+                <ul class="list-with-text">
+                    <li><i>- Sakoe-Chiba Band Constraint [1]:</i></li>
+                    <p>the Sakoe-Chiba band constraint is a tool that restrict the alignment path to stay within a diagonal band of a specified 
+                        width (radius) in the cost matrix. A smaller radius constrains the alignment path to follow a more continuous pattern, 
+                        making it suitable for aligning time series with a linear or nearly linear relationship.</p>
+                    <li><i>- Itakura Parallelogram Constraint [2]:</i></li>
+                    <p>the Itakura parallelogram constraint is an other tool that will restraint the alignment path in a parallelogram shaped
+                        region of the cost matrix. This shape is controled by defining the maximum slope of the boundary lines. Higher the slope
+                        is less restrictive the <i>DTW</i> will be.
+                    </p>
+                </ul>
+                                        
+                <h4>The Function :</h4>
+                <p><i>dtw_path</i> is the function developped by <i>tslearn</i>. It runs the classical <i>DTW</i> algorithm with some tunable parameters.
+                    Here are the parameters you can play with in this application :
                 </p>
+                <ul class="list-with-text">
+                    <li><i>- Global Constraint : {“itakura”, “sakoe_chiba”} or None (default: None)</i></li>
+                    <p>this defines which constraint method you want to use.
+                    <li><i>- sakoe_chiba_radius : int or None (default: None)</i></li>
+                    <p>radius to be used for Sakoe-Chiba band global constraint. If <i>None</i> and global_constraint is set to <i>“sakoe_chiba”</i>, 
+                        a radius of 1 is used. If both <i>sakoe_chiba_radius</i> and <i>itakura_max_slope</i> are set, global_constraint is used to infer 
+                        which constraint to use among the two. In this case, if global_constraint corresponds to no global constraint, a 
+                        RuntimeWarning is raised and no global constraint is used.</p>
+                    <li><i>- itakura_max_slope : float or None (default: None)</i></li>
+                    <p>maximum slope for the Itakura parallelogram constraint. If <i>None</i> and global_constraint is set to <i>“itakura”</i>, a maximum 
+                        slope of 2. is used. If both <i>sakoe_chiba_radius</i> and <i>itakura_max_slope</i> are set, global_constraint is used to infer 
+                        which constraint to use among the two. In this case, if global_constraint corresponds to no global constraint, a 
+                        RuntimeWarning is raised and no global constraint is used.</p>
+                </ul>
+
+                <h4>Your Data Format :</h4>
+                <p>This application aims to analyse your data on the basis of a specific format. Indeed your data must follow some sctrict rules :</p>
+                <ul class="list_format">
+                    <li>- Your file must be as an Excel format (.xlsx)</li>
+                    <li>- Each slide of excel file is meant to be for one time series/sequence</li>
+                    <li>- The first column of each file must be the X axis (example : <i>Depth</i> or <i>Time</i>) but the other columns can have different
+                        positions between slides
+                    </li>
+                    <li>- If <i>Option2</i> is used, the first slide becomes the reference sequence on which you want to align</li>
+                </ul>
+
+                <h4>References :</h4>
+                <ul class="list_ref">
+                    <li>- [1] : "Minimum Prediction Residual Principle Applied to Speech Recognition", <i>F. Itakura, IEEE Transactions on Acoustics, Speech, and Signal Processing, Feb 1975</i></li>
+                    <li>- [2] : "Dynamic Programming Algorithm Optimization for Spoken Word Recognition", <i>H. Sakoe and S. Chiba, IEEE Transactions on Acoustics, Speech, and Signal Processing, Feb 1978</i></li>
+                </ul>
             </div>
         </main>
 
         <footer>
             <p >Copyright 2023, B. Chaigneau</p>
         </footer>
+        <script>
+            const hamburger1 = document.getElementById("hamburger1");
+            const burgerMenu1 = document.getElementById("burger-menu1");
+
+            hamburger1.addEventListener("click", () => {
+            burgerMenu1.classList.toggle("show1");
+            });
+
+
+            document.addEventListener('click', function(event) {
+            const menuContainer = document.querySelector('.menu-container');
+            const burgerMenu = document.querySelector('.burger-menu1');
+
+            if (!menuContainer.contains(event.target) && !burgerMenu.contains(event.target)) {
+                burgerMenu.classList.remove('show1');
+            }
+            });
+        </script>
     </body>
 </html>
