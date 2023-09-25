@@ -43,6 +43,8 @@
           url: '/displays/reset',
           type: 'POST',
           dataType: 'json',
+          data: JSON.stringify({choice : choice}),
+          contentType: 'application/json',
           success: function(response) {
             // Parse the JSON response and update the Plotly figure
             var updatedFigData = JSON.parse(response.reset_json);
@@ -209,6 +211,8 @@
         url: '/back_data',
         type: 'POST',
         dataType: 'json',
+        data: JSON.stringify({choice : choice}),
+        contentType: 'application/json',
         success: function (response) {
           // Parse JSON response and update the "focus-container" Plotly figure
           const focusData = JSON.parse(response.focus_json);
@@ -230,6 +234,50 @@
   });
   </script>
   <script>
+    function updateInitDropdown(options) {
+      const dropdown = document.getElementById("variable-dropdown1");
+      dropdown.innerHTML = ""; // Clear existing options
+      options.forEach(option => {
+          const newOption = document.createElement("option");
+          newOption.value = option.value;
+          newOption.textContent = option.label;
+          dropdown.appendChild(newOption);
+      });
+    }
+    function updateFocusDropdown(options) {
+      const dropdown = document.getElementById("variable-dropdown2");
+      dropdown.innerHTML = ""; // Clear existing options
+      options.forEach(option => {
+          const newOption = document.createElement("option");
+          newOption.value = option.value;
+          newOption.textContent = option.label;
+          dropdown.appendChild(newOption);
+      });
+    }
+    // Event listener for when the DOM (Document Object Model) is fully loaded
+    function generateCheckboxes(itemsList) {
+      const checkboxList = document.getElementById('checkboxList');
+      checkboxList.innerHTML = ''; // Clear existing checkboxes
+      itemsList.forEach(item => {
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `
+          <label>
+            <input type="checkbox" name="selectedItems" value="${item.value}" checked>
+            ${item.label}
+          </label>
+        `;
+        checkboxList.appendChild(listItem);
+      });
+    }
+
+    // Event listener for when the DOM (Document Object Model) is fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Access the variable passed from Flask and Jinja templating
+      const itemsList = {{ focus_dropdown | tojson | safe }};
+      // Call the function to generate checkboxes when the page loads
+      generateCheckboxes(itemsList);
+    });
+
     // Function to show a hidden div element with the ID "algorithm"
     function showDiv() {
       var x = document.getElementById("algorithm");
@@ -237,6 +285,30 @@
       if (x.style.display === "none") {
         x.style.display = "flex";
       }
+      $.ajax({
+        url: '/update_plot_data',
+        type: 'GET',
+        dataType: 'json',
+        success: function (data) {
+          // Update the Plotly plots with the received data
+          const init_json = JSON.parse(data.init_json);
+          const modified_json = JSON.parse(data.modified_json);
+          const focus_json = JSON.parse(data.focus_json);
+
+          Plotly.react("plot-container", init_json.data, init_json.layout);
+          Plotly.react("modified-fullplot", modified_json.data, modified_json.layout);
+          Plotly.react("focus-container", focus_json.data, focus_json.layout);
+                     
+          const updatedItemsList = data.focus_dropdown;
+          generateCheckboxes(updatedItemsList);
+          const updatedInitDropdown = data.init_dropdown;
+          updateInitDropdown(updatedInitDropdown);
+          updateFocusDropdown(updatedItemsList);
+        },
+        error: function (error) {
+          console.error("Error retrieving plot data: ", error);
+        }
+      });
     }
 
     // Function to handle file upload success
@@ -511,35 +583,6 @@
     });
   </script>
 
-  <script>   
-    // Event listener for when the DOM (Document Object Model) is fully loaded
-    document.addEventListener('DOMContentLoaded', function() {
-      // Access the variable passed from Flask and Jinja templating
-      // The {{ focus_dropdown | tojson | safe }} is typically a server-side variable
-      const itemsList = {{ focus_dropdown | tojson | safe }};
-      // Function to generate checkboxes dynamically
-      function generateCheckboxes() {
-        // Get a reference to the element where checkboxes will be added
-        const checkboxList = document.getElementById('checkboxList');
-        // Loop through each item in the itemsList array
-        itemsList.forEach(item => {
-          // Create a new list item
-          const listItem = document.createElement('li');
-          // Populate the list item with HTML containing a checkbox and label
-          listItem.innerHTML = `
-            <label>
-              <input type="checkbox" name="selectedItems" value="${item.value}" checked>
-              ${item.label}
-            </label>
-          `;  
-          // Append the new list item to the checkboxList
-          checkboxList.appendChild(listItem);
-        });
-      }
-      // Call the function to generate checkboxes when the page loads
-      generateCheckboxes();
-    });
-  </script>
 
   <script type="text/javascript">
     // Initial Plot Setup

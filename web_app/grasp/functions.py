@@ -13,6 +13,8 @@ from plotly.subplots import make_subplots
 
 from tslearn.metrics import dtw_path
 from scipy.interpolate import interp1d
+from sklearn.preprocessing import MinMaxScaler
+
 
 
 
@@ -235,6 +237,7 @@ def focus_plot(init_database, step, global_constraint=None, sakoe_chiba_radius=N
     # Creation de variables
     fig_json = None
     dropdown_options = None
+    var1_dtw = None
     var2_dtw = None
     # dropdown_value = la variable à afficher
     if dropdown_value :
@@ -391,30 +394,48 @@ def focus_plot(init_database, step, global_constraint=None, sakoe_chiba_radius=N
 
 
         #Remplir HistoricData pour avoir en mémoire la taille de df2 et les dtw_path
-        history = HistoricData.query.limit(step).all()
+        history = HistoricData.query.all()
         if not history :
-            new_row = HistoricData(lgth_last_elem=len(df2))
+            new_row = HistoricData()
             if not var2_dtw :
+                print('DTW not added')
                 new_row.var2_dtw = json.dumps(list(range(len(df2))))
+                new_row.lgth_last_elem=len(df2)
+                new_row.min_depth=np.min(df2.iloc[:,1])
+                new_row.max_depth=np.max(df2.iloc[:,1])
             else :
+                print('DTW added')
                 new_row.var2_dtw = json.dumps(var2_dtw)
+                new_row.lgth_last_elem=len(df2)
+                new_row.min_depth=np.min(df2.iloc[:,1])
+                new_row.max_depth=np.max(df2.iloc[:,1])
             db.session.add(new_row)
         else :
-            if len(history) >= step :
-                last_row = history[-1]
-                last_row.lgth_last_elem = len(df2)
+            if len(history) > step :
+                step_row = history[step]
                 if not var2_dtw:
-                    last_row.var2_dtw = json.dumps(list(range(len(df2))))
+                    print('DTW not added 2')
+                    step_row.var2_dtw = json.dumps(list(range(len(df2))))
+                    step_row.lgth_last_elem=len(df2)
+                    step_row.min_depth=np.min(df2.iloc[:,1])
+                    step_row.max_depth=np.max(df2.iloc[:,1])
                 else:
-                    last_row.var2_dtw = json.dumps(var2_dtw)       
+                    print('DTW added 2')
+                    step_row.var2_dtw = json.dumps(var2_dtw)
+                    step_row.min_depth=np.min(df2.iloc[:,1])
+                    step_row.max_depth=np.max(df2.iloc[:,1])       
             else :
                 print('STEP', step, len(history))
                 if not var2_dtw:
-                    new_row = HistoricData(lgth_last_elem=len(df2), var2_dtw=json.dumps(list(range(len(df2)))))
+                    print('DTW not added 3')
+                    new_row = HistoricData(lgth_last_elem=len(df2), var2_dtw=json.dumps(list(range(len(df2)))),
+                                           min_depth=np.min(df2.iloc[:,1]), max_depth=np.max(df2.iloc[:,1]))
                 else :
-                    new_row = HistoricData(lgth_last_elem=len(df2), var2_dtw=json.dumps(var2_dtw))
+                    print('DTW added 3')
+                    new_row = HistoricData(lgth_last_elem=len(df2), var2_dtw=json.dumps(var2_dtw),
+                                           min_depth=np.min(df2.iloc[:,1]), max_depth=np.max(df2.iloc[:,1]))
                 db.session.add(new_row)
-        db.session.commit()   
+        db.session.commit()  
 
         return fig_json, dropdown_options
 
@@ -614,33 +635,6 @@ def focus_plot2(init_database, step, global_constraint=None, sakoe_chiba_radius=
         fig.update_yaxes(showline=True, showticklabels=True, color="black", nticks=7)
         fig_json = json.dumps(fig.to_dict())
 
-
-        #Remplir HistoricData pour avoir en mémoire la taille de df2 et les dtw_path
-        history = HistoricData.query.limit(step).all()
-        if not history :
-            new_row = HistoricData(lgth_last_elem=len(df2))
-            if not var2_dtw :
-                new_row.var2_dtw = json.dumps(list(range(len(df2))))
-            else :
-                new_row.var2_dtw = json.dumps(var2_dtw)
-            db.session.add(new_row)
-        else :
-            if len(history) >= step :
-                last_row = history[-1]
-                last_row.lgth_last_elem = len(df2)
-                if not var2_dtw:
-                    last_row.var2_dtw = json.dumps(list(range(len(df2))))
-                else:
-                    last_row.var2_dtw = json.dumps(var2_dtw)       
-            else :
-                print('STEP', step, len(history))
-                if not var2_dtw:
-                    new_row = HistoricData(lgth_last_elem=len(df2), var2_dtw=json.dumps(list(range(len(df2)))))
-                else :
-                    new_row = HistoricData(lgth_last_elem=len(df2), var2_dtw=json.dumps(var2_dtw))
-                db.session.add(new_row)
-        db.session.commit()   
-
         return fig_json, dropdown_options
 
 
@@ -651,8 +645,11 @@ def focus_plot2(init_database, step, global_constraint=None, sakoe_chiba_radius=
 
 
 #INTERPOLATION
-def interpolation(lgth, df):
+def interpolation(lgth, df, lst_elem, min_depth, max_depth):
     # Define the interpolation function that resizes a DataFrame to a desired length
+
+    max_elem = np.max(lst_elem)
+    min_elem = np.min(lst_elem)
 
     desired_length = lgth  # Desired length for the interpolated DataFrame
     # Create interpolation functions for each column in the input DataFrame using linear interpolation
@@ -665,6 +662,12 @@ def interpolation(lgth, df):
     interpolated_data = {col: interp_func(new_indices) for col, interp_func in interp_funcs.items()}
     # Create a new DataFrame with the interpolated data
     interpolated_df = pd.DataFrame(interpolated_data)
+
+    scaler = MinMaxScaler(feature_range=(min_elem, max_elem))
+    interpolated_df.iloc[:,0] = scaler.fit_transform(np.array(interpolated_df.iloc[:, 0]).reshape(-1, 1))
+    interpolated_df.iloc[:, 0] = np.round(interpolated_df.iloc[:, 0]).astype(int)
+    scaler2 = MinMaxScaler(feature_range=(float(min_depth), float(max_depth)))
+    interpolated_df.iloc[:,1] = scaler2.fit_transform(np.array(interpolated_df.iloc[:, 1]).reshape(-1, 1))
 
     return interpolated_df  # Return the resized DataFrame after linear interpolation
 

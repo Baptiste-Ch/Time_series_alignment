@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import sys
 import ast
 from flask import render_template, url_for, redirect, request, session, jsonify, send_file, current_app
@@ -7,6 +8,7 @@ from grasp.models import InputData, CounterData, VerifData, DropdownData1, Dropd
 
 import pandas as pd
 import sqlite3
+import json
 
 
 sys.path.append(app.root_path)
@@ -70,30 +72,72 @@ def upload():
     return redirect(url_for('displays'))
 
 
+#---------------UPDATE PLOT DATA -----------------
+@app.route('/update_plot_data', methods=['GET', 'POST'])
+def update_plot_data():
+    init_json = {}  # Use an empty dictionary as a placeholder
+    init_dropdown = []  # Use an empty list as a placeholder
+    modified_json = {}  # Use an empty dictionary as a placeholder
+    modified_dropdown = []  # Use an empty list as a placeholder
+    step = 0
+    focus_json = {}  # Use an empty dictionary as a placeholder
+    focus_dropdown = []  # Use an empty list as a placeholder
+
+    conn_1 = sqlite3.connect('init_data.db')
+    conn_2 = sqlite3.connect('modified_data.db')
+    cursor1 = conn_1.cursor()
+    cursor2 = conn_2.cursor()
+    cursor1.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    cursor2.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    table_names1 = cursor1.fetchall()
+    table_names2 = cursor2.fetchall()
+    print(table_names1, table_names2)
+
+    if table_names1 and table_names2:
+        print('IM INSIDE')
+        # Generate JSON data and dropdown options for the initial state.
+        init_json, init_dropdown = overall_plot('init_data.db')
+
+        # Generate JSON data and dropdown options for the modified state.
+        modified_json, modified_dropdown = overall_plot('modified_data.db')
+
+        # Initialize the step to 0 and generate JSON data and dropdown options for the focus plot.
+        step = 0
+        focus_json, focus_dropdown = focus_plot('init_data.db', step)
+
+        # Retrieve or create a DropdownData2 object and update its dropdown value.
+        dropdown_data = DropdownData2.query.first()
+        if dropdown_data:
+            dropdown_data.dropdown_value = focus_dropdown[0]['label']
+            print(focus_dropdown[0]['label'])
+        else:
+            new_dropdown_data = DropdownData2(dropdown_value=focus_dropdown[0]['label'])
+            db.session.add(new_dropdown_data)
+        db.session.commit()
+    print(focus_dropdown)
+    print(init_dropdown)
+    print(modified_dropdown)
+    
+    return jsonify({"init_json" : init_json, 
+            "init_dropdown" : init_dropdown, 
+            "modified_json" : modified_json, 
+            "modified_dropdown" : modified_dropdown, 
+            "focus_json" : focus_json, 
+            "focus_dropdown" : focus_dropdown })
+
+
 #-----------------DISPLAYS-------------------#
 @app.route("/displays", methods=['GET', 'POST'])
 def displays():
     """Goal: Generate data for visualization plots and update dropdown value."""
 
-    # Generate JSON data and dropdown options for the initial state.
-    init_json, init_dropdown = overall_plot('init_data.db')
-
-    # Generate JSON data and dropdown options for the modified state.
-    modified_json, modified_dropdown = overall_plot('modified_data.db')
-
-    # Initialize the step to 0 and generate JSON data and dropdown options for the focus plot.
+    init_json = {}  # Use an empty dictionary as a placeholder
+    init_dropdown = []  # Use an empty list as a placeholder
+    modified_json = {}  # Use an empty dictionary as a placeholder
+    modified_dropdown = []  # Use an empty list as a placeholder
     step = 0
-    focus_json, focus_dropdown = focus_plot('init_data.db', step)
-
-    # Retrieve or create a DropdownData2 object and update its dropdown value.
-    dropdown_data = DropdownData2.query.first()
-    if dropdown_data:
-        dropdown_data.dropdown_value = focus_dropdown[0]['label']
-        print(focus_dropdown[0]['label'])
-    else:
-        new_dropdown_data = DropdownData2(dropdown_value=focus_dropdown[0]['label'])
-        db.session.add(new_dropdown_data)
-    db.session.commit()
+    focus_json = {}  # Use an empty dictionary as a placeholder
+    focus_dropdown = []  # Use an empty list as a placeholder
 
     # Render the 'displays.html' template with the generated data.
     return render_template('displays.html', init_json=init_json, init_dropdown=init_dropdown,
@@ -123,7 +167,13 @@ def reset():
         dropdown_value = dropdown_data.dropdown_value
 
     # Generate JSON data for the reset focus plot.
-    reset_json, _ = focus_plot('init_data.db', step=step, dropdown_value=dropdown_value)
+    data = json.loads(request.data)
+    choice = data.get('choice')
+
+    if choice == 0 :
+        reset_json, _ = focus_plot('init_data.db', step=step, dropdown_value=dropdown_value)
+    if choice == 1 :
+        reset_json, _ = focus_plot2('init_data.db', step=step, dropdown_value=dropdown_value)
     
     # Return the reset JSON data.
     return {'reset_json': reset_json}
@@ -308,7 +358,7 @@ def next_data():
     # Read data from tables in 'temporary_data.db'.
     df1 = pd.read_sql(f'SELECT * FROM {table_names1[0]}', conn1)
     df2 = pd.read_sql(f'SELECT * FROM {table_names1[1]}', conn1)
-    inter_empty = True
+    inter2 = df2
 
     # Fetch historical data from 'HistoricData' table and perform data transformations.
     history = HistoricData.query.limit(step).all()
@@ -316,14 +366,8 @@ def next_data():
         for i in reversed(range(len(history))):
             lst_elem = ast.literal_eval(history[i].var2_dtw)
             lgth_last_elem = history[i].lgth_last_elem
-            inter1 = interpolation(lgth_last_elem, df1)
-            inter2 = interpolation(lgth_last_elem, df2)
-            inter1 = inter1.iloc[lst_elem].reset_index(drop=True)
+            inter2 = interpolation(lgth_last_elem, inter2, lst_elem, history[i].min_depth, history[i].max_depth)
             inter2 = inter2.iloc[lst_elem].reset_index(drop=True)
-            inter_empty = False
-            
-    if inter_empty:
-        inter2 = df2
 
     # Drop and replace a table in 'modified_data.db' with the transformed data.
     cursor2.execute(f"DROP TABLE IF EXISTS {table_names1[1]}")
@@ -488,8 +532,16 @@ def back_data():
         os.remove(os.path.join(app_path, 'temporary_data.db'))
     conn1.close()
 
+    data = json.loads(request.data)
+    choice = data.get('choice')
+
+    if choice == 0 :
+        which_focus = 'figure_focus'
+    if choice == 1 :
+        which_focus = 'figure_focus2'
+
     # Redirect to the 'figure_focus' route with the selected dropdown value.
-    return redirect(url_for('figure_focus', dropdown_value=dropdown_value))
+    return redirect(url_for(which_focus, dropdown_value=dropdown_value))
 
 
 #--------------- STORE DATA ------------------------#

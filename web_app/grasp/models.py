@@ -95,4 +95,6 @@ class HistoricData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     lgth_last_elem = db.Column(db.Integer)
     var2_dtw = db.Column(db.String)   
+    min_depth = db.Column(db.String) 
+    max_depth = db.Column(db.String) 
 
