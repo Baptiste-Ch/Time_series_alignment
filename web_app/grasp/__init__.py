@@ -59,11 +59,11 @@ def empty_tables():
         session['loaded'] = True
 
         # Remove a temporary SQLite database file if it exists
-        conn = sqlite3.connect('temporary_data.db')
+        #conn = sqlite3.connect('temporary_data.db')
         app_path = os.path.dirname(app.root_path)
         if os.path.exists(os.path.join(app_path, 'temporary_data.db')):
             os.remove(os.path.join(app_path, 'temporary_data.db'))
-        conn.close()
+        #conn.close()
 
 # Import routes from the grasp module
 from grasp import routes
