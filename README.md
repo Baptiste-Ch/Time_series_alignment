@@ -11,15 +11,17 @@ Le format de la donnée d'entrée doit correspondre à celui présenté dans _in
   - Variable X en première colonne ;
   - Toutes les variables au même nom ;
 
+Version python : 3.9.13
+
 Packaging nécessaire :
-  - flask
-  - flask_sqlalchemy
-  - flask_session
-  - flask_bcrypt
-  - flask_login
-  - flask_dropzone
-  - sqlite3
-  - json
+  - flask : 2.2.3
+  - flask_sqlalchemy : 3.0.3
+  - flask_session : 0.5.0
+  - flask_bcrypt : 1.0.1
+  - flask_login : 0.6.2
+  - flask_dropzone : 1.6.0
+  - sqlite3 : 3.39.2
+  - json : 
   - secrets
   - PIL
 
