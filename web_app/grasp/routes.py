@@ -21,11 +21,8 @@ from functions import overall_plot, focus_plot, focus_plot2, read_counter, incre
 # Define a route for the homepage ("/" and "/home" URLs) using the @app.route decorator.
 # When a user accesses these URLs, the 'home' function is called.
 
-@app.route("/")
-@app.route("/home")
-def home():
-    # Render the 'home.html' template and return it as the response to the user's request.
-    return render_template('home.html')
+
+
 
 
 #-------------- UPLOAD ---------------#
@@ -127,6 +124,7 @@ def update_plot_data():
 
 
 #-----------------DISPLAYS-------------------#
+@app.route("/")
 @app.route("/displays", methods=['GET', 'POST'])
 def displays():
     """Goal: Generate data for visualization plots and update dropdown value."""
