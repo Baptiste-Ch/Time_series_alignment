@@ -374,12 +374,13 @@ def next_data():
     inter2.to_sql(table_names1[1], conn2, index=False)
     conn2.commit()
     conn2.close()
+    conn1.close()
 
     # Remove the 'temporary_data.db' file if it exists.
     app_path = os.path.dirname(app.root_path)
     if os.path.exists(os.path.join(app_path, 'temporary_data.db')):
         os.remove(os.path.join(app_path, 'temporary_data.db'))
-    conn1.close()
+    
 
     # Reorder tables in 'init_data.db' and 'modified_data.db'.
     reorder_tables('init_data.db', 'modified_data.db')
@@ -456,10 +457,11 @@ def next_data2():
     conn2.close()
 
     # Remove the 'temporary_data.db' file if it exists.
+    conn1.close()
     app_path = os.path.dirname(app.root_path)
     if os.path.exists(os.path.join(app_path, 'temporary_data.db')):
         os.remove(os.path.join(app_path, 'temporary_data.db'))
-    conn1.close()
+    
 
     # Reorder tables in 'init_data.db' and 'modified_data.db'.
     reorder_tables('init_data.db', 'modified_data.db')
@@ -526,11 +528,10 @@ def back_data():
         decrease_counter()
 
     # Remove the 'temporary_data.db' file if it exists.
-    conn1 = sqlite3.connect('temporary_data.db')
     app_path = os.path.dirname(app.root_path)
     if os.path.exists(os.path.join(app_path, 'temporary_data.db')):
         os.remove(os.path.join(app_path, 'temporary_data.db'))
-    conn1.close()
+    
 
     data = json.loads(request.data)
     choice = data.get('choice')
