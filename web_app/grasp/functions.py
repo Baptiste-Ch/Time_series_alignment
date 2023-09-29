@@ -36,6 +36,25 @@ def text_to_nan(cell):
         return pd.NA
 
 
+# TEXT_TO_FLOAT32
+def text_to_float32(value):
+    try:
+        return np.float32(value)
+    except (ValueError, TypeError):
+        return np.nan
+
+
+def convert_columns(df):
+    print('DO I REDUCE DIMENSIONS?')
+    for col in df.columns:
+        max_values = df[col].abs().max()
+        if max_values > 65500:
+            df[col] = df[col].astype(np.float32)
+        else:
+            df[col] = df[col].astype(np.float16)
+    
+    return df
+
 
 # READ_COUNTER
 def read_counter():
@@ -707,6 +726,9 @@ def multivariate_alignment_v2(df1, df2, global_constraint='itakura', sakoe_chiba
                               itakura_max_slope=None):
     # Define the multivariate alignment function version 2 that computes alignment paths
     
+    df1 = convert_columns(df1)
+    df2 = convert_columns(df2)
+    print(df2.dtypes)
     # Compute the alignment path between two input DataFrames
     path = dtw_path(df1.values, df2.values, global_constraint=global_constraint, 
                     sakoe_chiba_radius=sakoe_chiba_radius, itakura_max_slope=itakura_max_slope)

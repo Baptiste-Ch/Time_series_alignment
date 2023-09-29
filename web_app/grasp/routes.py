@@ -13,7 +13,7 @@ import json
 
 sys.path.append(app.root_path)
 
-from functions import overall_plot, focus_plot, focus_plot2, read_counter, increment_counter, reorder_tables, text_to_nan, decrease_counter, interpolation
+from functions import overall_plot, focus_plot, focus_plot2, read_counter, increment_counter, reorder_tables, text_to_nan, decrease_counter, interpolation, text_to_float32
 
 
 
@@ -48,7 +48,10 @@ def upload():
     # Read the Excel file into a Pandas DataFrame and process it.
     df = pd.read_excel(file_path, sheet_name=None, engine='openpyxl')
     for sheet_name, item in df.items():
-        df[sheet_name].iloc[1:] = item.iloc[1:].applymap(text_to_nan)
+        item.iloc[1:] = item.iloc[1:].applymap(text_to_nan)
+        numeric_columns = item.select_dtypes(include=[np.number]).columns
+        item[numeric_columns] = item[numeric_columns].astype(np.float32)
+
 
     # Create SQLite databases and connect to them.
     app_path = os.path.dirname(app.root_path)
@@ -111,9 +114,8 @@ def update_plot_data():
             new_dropdown_data = DropdownData2(dropdown_value=focus_dropdown[0]['label'])
             db.session.add(new_dropdown_data)
         db.session.commit()
-    print(focus_dropdown)
-    print(init_dropdown)
-    print(modified_dropdown)
+    conn_1.close()
+    conn_2.close()
     
     return jsonify({"init_json" : init_json, 
             "init_dropdown" : init_dropdown, 
